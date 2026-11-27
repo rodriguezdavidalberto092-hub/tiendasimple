@@ -1,6 +1,6 @@
 # TiendaSimple - TP2 Integrador
 
-Aplicación React/Vite con una API Node.js que sirve el catálogo de productos.
+Aplicación React/Vite con una API Node.js que sirve el catálogo de productos. Tanto el catálogo como las páginas de detalle consultan los productos desde esta API.
 
 ## Estructura
 

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ProductoCard } from "../components/ProductoCard";
-
-const API_URL = import.meta.env.VITE_API_URL || "/api/productos";
+import { obtenerProductos } from "../api/productos";
 
 export function Catalogo() {
   const [productos, setProductos] = useState([]);
@@ -13,17 +12,7 @@ export function Catalogo() {
 
     async function cargarProductos() {
       try {
-        const respuesta = await fetch(API_URL, { signal: controller.signal });
-        if (!respuesta.ok) {
-          throw new Error(`El servidor respondió con estado ${respuesta.status}.`);
-        }
-
-        const datos = await respuesta.json();
-        if (!Array.isArray(datos)) {
-          throw new Error("La respuesta del servidor no tiene el formato esperado.");
-        }
-
-        setProductos(datos);
+        setProductos(await obtenerProductos(controller.signal));
       } catch (errorCarga) {
         if (errorCarga.name !== "AbortError") {
           setError(errorCarga.message || "No se pudo cargar el catálogo.");
