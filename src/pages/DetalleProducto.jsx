@@ -1,14 +1,53 @@
-import { useParams, Link } from "react-router-dom";
-import { productos } from "../data/productos";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { obtenerProductos } from "../api/productos";
 
 export function DetalleProducto() {
-  // Obtenemos el "id" que viene en la URL (ej: /producto/2)
   const { id } = useParams();
-  
-  // Buscamos el producto que coincida con ese id
-  const producto = productos.find((p) => p.id === Number(id));
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
 
-  // Si alguien escribe una URL inválida (ej: /producto/999)
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function cargarProductos() {
+      try {
+        setProductos(await obtenerProductos(controller.signal));
+      } catch (errorCarga) {
+        if (errorCarga.name !== "AbortError") {
+          setError(errorCarga.message || "No se pudo cargar el producto.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCargando(false);
+        }
+      }
+    }
+
+    cargarProductos();
+    return () => controller.abort();
+  }, []);
+
+  const producto = productos.find((item) => item.id === Number(id));
+
+  if (cargando) {
+    return <p className="estado-catalogo">Cargando producto...</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="detalle-container">
+        <p className="error" role="alert">
+          No se pudo cargar el producto: {error}
+        </p>
+        <Link to="/" className="btn btn-secundario">
+          Volver al catálogo
+        </Link>
+      </div>
+    );
+  }
+
   if (!producto) {
     return (
       <div className="detalle-container">
